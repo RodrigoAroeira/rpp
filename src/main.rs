@@ -20,10 +20,7 @@ fn main() -> io::Result<()> {
     }
 
     let mut run_command = Command::new(OUT_FILE);
-    let run_res = run(run_command.args(runtime_args));
-
-    // If run_command fails, try rm before unwrapping results
-    run_res?;
+    run(run_command.args(runtime_args))?;
 
     Ok(())
 }
@@ -36,4 +33,3 @@ fn run(command: &mut Command) -> io::Result<()> {
     };
     Ok(())
 }
-
