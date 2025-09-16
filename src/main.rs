@@ -2,24 +2,27 @@ mod helpers;
 
 use std::{io, process::Command};
 
-use crate::helpers::{sanitize_args, should_rebuild};
+use crate::helpers::{gen_and_push_out_name, sanitize_args, should_rebuild};
 
-const PREFERRED_VERSION: &str = "-std=c++23";
-const OUT_FILE: &str = "/tmp/rpp.out";
 const COMPILER: &str = "g++";
 
 fn main() -> io::Result<()> {
-    let (mut compile_args, runtime_args) = sanitize_args(std::env::args().skip(1));
+    let mut args = std::env::args();
+    let filename = args.next().unwrap();
+
+    let (mut compile_args, runtime_args) = sanitize_args(args);
+
+    let out_file = gen_and_push_out_name(&filename, &mut compile_args);
 
     let force = compile_args.iter().any(|arg| arg == "--force");
     compile_args.retain(|arg| arg != "--force");
 
     let mut compile_command = Command::new(COMPILER);
-    if force || should_rebuild(&compile_args[0], OUT_FILE) {
+    if force || should_rebuild(&compile_args[0], &out_file) {
         run(compile_command.args(compile_args))?;
     }
 
-    let mut run_command = Command::new(OUT_FILE);
+    let mut run_command = Command::new(&out_file);
     run(run_command.args(runtime_args))?;
 
     Ok(())
