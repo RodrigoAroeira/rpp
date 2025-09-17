@@ -1,29 +1,39 @@
+mod cli;
 mod helpers;
 
 use std::{io, process::Command};
 
-use crate::helpers::{gen_and_push_out_name, sanitize_args, should_rebuild};
+use clap::Parser;
+
+use crate::{
+    cli::Cli,
+    helpers::{gen_and_push_out_name, should_rebuild},
+};
 
 const COMPILER: &str = "g++";
 
 fn main() -> io::Result<()> {
-    let args = std::env::args().skip(1);
-    let filename = std::env::args().nth(1).unwrap();
+    let mut args = Cli::parse();
+    args.sanitize();
 
-    let (mut compile_args, runtime_args) = sanitize_args(args);
-
-    let out_file = gen_and_push_out_name(&filename, &mut compile_args);
-
-    let force = compile_args.iter().any(|arg| arg == "--force");
-    compile_args.retain(|arg| arg != "--force");
+    let out_file = gen_and_push_out_name(&args.src_file, &mut args.compile_args);
 
     let mut compile_command = Command::new(COMPILER);
-    if force || should_rebuild(&compile_args[0], &out_file) {
-        run(compile_command.args(compile_args))?;
+    let build = args.force || should_rebuild(&args.src_file, &out_file);
+
+    if args.verbose && build {
+        println!("[INFO] Building {} -> {}", args.src_file, &out_file);
     }
 
+    if build {
+        run(compile_command.args(args.compile_args))?;
+    }
+
+    if args.verbose && !build {
+        eprintln!("[INFO] Rebuild not needed for {}", args.src_file);
+    }
     let mut run_command = Command::new(&out_file);
-    run(run_command.args(runtime_args))?;
+    run(run_command.args(args.runtime_args))?;
 
     Ok(())
 }
