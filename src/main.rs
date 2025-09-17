@@ -1,14 +1,11 @@
 mod cli;
 mod helpers;
 
-use std::{io, process::Command};
+use std::{io, path::Path, process::Command};
 
 use clap::Parser;
 
-use crate::{
-    cli::Cli,
-    helpers::{gen_and_push_out_name, should_rebuild},
-};
+use crate::{cli::Cli, helpers::gen_and_push_out_name};
 
 const COMPILER: &str = "g++";
 
@@ -18,22 +15,21 @@ fn main() -> io::Result<()> {
 
     let out_file = gen_and_push_out_name(&args.src_file, &mut args.compile_args);
 
-    let mut compile_command = Command::new(COMPILER);
-    let build = args.force || should_rebuild(&args.src_file, &out_file);
+    let should_build = args.force || !Path::new(&out_file).exists();
 
-    if args.verbose && build {
+    if args.verbose && should_build {
         println!("[INFO] Building {} -> {}", args.src_file, &out_file);
     }
 
-    if build {
-        run(compile_command.args(args.compile_args))?;
+    if should_build {
+        run(Command::new(COMPILER).args(args.compile_args))?;
     }
 
-    if args.verbose && !build {
+    if args.verbose && !should_build {
         eprintln!("[INFO] Rebuild not needed for {}", args.src_file);
     }
-    let mut run_command = Command::new(&out_file);
-    run(run_command.args(args.runtime_args))?;
+
+    run(Command::new(&out_file).args(args.runtime_args))?;
 
     Ok(())
 }
