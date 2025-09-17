@@ -7,8 +7,8 @@ use crate::helpers::{gen_and_push_out_name, sanitize_args, should_rebuild};
 const COMPILER: &str = "g++";
 
 fn main() -> io::Result<()> {
-    let mut args = std::env::args();
-    let filename = args.next().unwrap();
+    let args = std::env::args().skip(1);
+    let filename = std::env::args().nth(1).unwrap();
 
     let (mut compile_args, runtime_args) = sanitize_args(args);
 
