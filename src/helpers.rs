@@ -1,5 +1,6 @@
 use std::{
     hash::{DefaultHasher, Hasher},
+    path::Path,
     time::SystemTime,
 };
 
@@ -73,6 +74,10 @@ pub fn gen_and_push_out_name(src_filename: &str, compile_args: &mut Vec<String>)
 }
 
 pub fn should_rebuild(curr_file: &str, out_file: &str) -> bool {
+    if !Path::new(out_file).exists() {
+        return true;
+    }
+
     let curr_time = std::fs::metadata(curr_file)
         .and_then(|m| m.modified())
         .unwrap_or(SystemTime::UNIX_EPOCH);
