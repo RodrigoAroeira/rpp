@@ -13,7 +13,7 @@ fn main() -> io::Result<()> {
     let mut args = Cli::parse();
     args.sanitize();
 
-    let out_file = gen_and_push_out_name(&args.src_file, &mut args.compile_args);
+    let out_file = gen_and_push_out_name(&args.src_file, &mut args.compile_args, args.verbose);
 
     let should_build = args.force || !Path::new(&out_file).exists();
 
