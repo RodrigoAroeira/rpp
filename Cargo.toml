@@ -1,10 +1,12 @@
 [package]
 name = "rpp"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2024"
 
 [dependencies]
 clap = { version = "4.5.47", features = ["derive"] }
+env_logger = "0.11.11"
+log = "0.4.33"
 
 [profile.release]
 opt-level = "s"

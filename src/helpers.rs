@@ -4,11 +4,7 @@ use std::{
     io::{BufRead, BufReader},
 };
 
-pub fn gen_and_push_out_name(
-    src_filename: &str,
-    compile_args: &mut Vec<String>,
-    verbose: bool,
-) -> String {
+pub fn gen_and_push_out_name(src_filename: &str, compile_args: &mut Vec<String>) -> String {
     let mut hasher = DefaultHasher::new();
     src_filename.hash(&mut hasher);
 
@@ -16,9 +12,7 @@ pub fn gen_and_push_out_name(
         let file = File::open(filename).expect("Unable to open file");
         let reader = BufReader::new(file);
         for line in reader.lines().map_while(Result::ok) {
-            if verbose {
-                eprintln!("[INFO] Hashing: {line:?}");
-            }
+            log::info!("Hashing: {line:?}");
             line.hash(hasher);
         }
     };

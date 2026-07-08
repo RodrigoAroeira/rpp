@@ -10,6 +10,7 @@ use crate::{cli::Cli, helpers::gen_and_push_out_name};
 const COMPILER: &str = "g++";
 
 fn main() -> io::Result<()> {
+    env_logger::init();
     let mut args = Cli::parse();
     args.sanitize();
 
@@ -17,16 +18,11 @@ fn main() -> io::Result<()> {
 
     let should_build = args.force || !Path::new(&out_file).exists();
 
-    if args.verbose && should_build {
-        println!("[INFO] Building {} -> {}", args.src_file, &out_file);
-    }
-
     if should_build {
+        log::info!("Building {} -> {}", args.src_file, &out_file);
         run(Command::new(COMPILER).args(args.compile_args))?;
-    }
-
-    if args.verbose && !should_build {
-        eprintln!("[INFO] Rebuild not needed for {}", args.src_file);
+    } else {
+        log::info!("Rebuild not needed for {}", args.src_file);
     }
 
     run(Command::new(&out_file).args(args.runtime_args))?;

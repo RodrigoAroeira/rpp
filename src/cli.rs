@@ -9,10 +9,6 @@ pub struct Cli {
     #[arg(short, long)]
     pub force: bool,
 
-    /// Displays extra information while running
-    #[arg(short, long)]
-    pub verbose: bool,
-
     /// Source file to compile
     pub src_file: String,
 
@@ -37,10 +33,15 @@ impl Cli {
             .position(|arg| arg.starts_with("-o"))
         {
             // Remove -o
+            log::warn!("Removing -o arg");
             self.compile_args.remove(idx);
 
             // Remove arg following -o
             if idx < self.compile_args.len() {
+                log::warn!(
+                    "Removing arg '{}' that came after -o",
+                    self.compile_args[idx]
+                );
                 self.compile_args.remove(idx);
             }
         }
